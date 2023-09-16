@@ -18,7 +18,7 @@ Description : DVector.cpp
 #include <boost/version.hpp>
 #include <boost/test/unit_test.hpp>
 
-
+/*
 namespace
 {
     struct Fixture
@@ -28,13 +28,10 @@ namespace
         // And here it is correct to finish working with it
         ~Fixture() = default;
 
-        /** And here is the test object itself **/
         DVector::DVector<int> dVector;
     };
-
 }
 
-/*
 BOOST_AUTO_TEST_CASE(MyTestCase)
 {
     // To simplify this example test, let's suppose we'll test 'float'.
@@ -44,23 +41,28 @@ BOOST_AUTO_TEST_CASE(MyTestCase)
     BOOST_CHECK(x != 0.0f);
     BOOST_CHECK_EQUAL((int)x, 9);
     BOOST_CHECK_CLOSE(x, 9.5f, 0.0001f); // Checks differ no more then 0.0001%
-}*/
+}
+ */
 
 BOOST_AUTO_TEST_SUITE(CreateBasicTests)
 
-    BOOST_FIXTURE_TEST_CASE(CreateAndCheckSize, Fixture)
+    BOOST_AUTO_TEST_CASE(CreateAndCheckSize)
     {
-        BOOST_CHECK(0 == dVector.Size());
+        DVector::DVector<int> dVector;
+        BOOST_CHECK_EQUAL(0, dVector.Size());
     }
 
-    BOOST_FIXTURE_TEST_CASE(CreateAndCheckDefaultCapacity, Fixture)
+    BOOST_AUTO_TEST_CASE(CreateAndCheckDefaultCapacity)
     {
-        BOOST_CHECK(0 == dVector.Capacity());
+        DVector::DVector<int> dVector;
+        BOOST_CHECK_EQUAL(10, dVector.Capacity());
     }
 
-    BOOST_FIXTURE_TEST_CASE(CreateAndCheckCustomCapacity, Fixture)
+    BOOST_AUTO_TEST_CASE(CreateAndCheckCustomCapacity)
     {
-        BOOST_CHECK(0 == dVector.Capacity());
+        constexpr size_t capacity { 20 };
+        DVector::DVector<int> dVector (capacity);
+        BOOST_CHECK_EQUAL(capacity, dVector.Capacity());
     }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -70,8 +72,9 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(PushBackTests)
 
-    BOOST_FIXTURE_TEST_CASE(PushBackFewElements, Fixture)
+    BOOST_AUTO_TEST_CASE(PushBackFewElements)
     {
+        DVector::DVector<int> dVector;
         dVector.push_back(21);
         dVector.push_back(22);
         dVector.push_back(23);
