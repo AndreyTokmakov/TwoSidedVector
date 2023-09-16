@@ -158,7 +158,12 @@ namespace DVector
 
         [[nodiscard]]
         inline bool Empty() const noexcept {
-            return 0 == capacity || 1 != (right - left);
+            return 0 == capacity || 1 == (right - left);
+        }
+
+        [[nodiscard]]
+        inline pointer Data() const noexcept {
+            return data + left + 1;
         }
 
         inline void Clear() noexcept

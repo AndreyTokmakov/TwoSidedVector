@@ -84,3 +84,42 @@ BOOST_AUTO_TEST_SUITE(PushBackTests)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+BOOST_AUTO_TEST_SUITE(ClearMethodTests)
+
+    BOOST_AUTO_TEST_CASE(ClearVector)
+    {
+        DVector::DVector<int> dVector;
+        for (int i = 0; i < 55; ++i)
+            dVector.push_back(i);
+
+        BOOST_CHECK_EQUAL(55, dVector.Size());
+        BOOST_CHECK_EQUAL(false, dVector.Empty());
+
+        dVector.Clear();
+
+        BOOST_CHECK_EQUAL(0, dVector.Size());
+        BOOST_CHECK_EQUAL(true, dVector.Empty());
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(DataMethodTests)
+
+    BOOST_AUTO_TEST_CASE(GetData_CheckValues)
+    {
+        DVector::DVector<int> dVector;
+
+        const std::vector<int> testValues { 3, 4, 5, 6, 7};
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        const int* data = dVector.Data();
+        for (size_t idx = 0; idx < dVector.Size(); ++idx)
+        {
+            BOOST_CHECK_EQUAL(testValues[idx], data[idx]);
+        }
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
