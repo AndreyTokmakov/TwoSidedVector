@@ -133,7 +133,7 @@ namespace DVector
 
         [[nodiscard]]
         object_type& operator[] (size_t index) const {
-            return this->data[index];
+            return this->data[index + left + 1];
         }
 
         [[nodiscard]]
