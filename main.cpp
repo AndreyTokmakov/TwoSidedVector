@@ -10,10 +10,11 @@ Description : DVector.cpp
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE MyTest
 
-#include <cstdlib>
 #include <iostream>
 #include <ranges>
 #include <utility>
+#include <deque>
+
 #include "DVector.h"
 
 /** For testing only: **/
@@ -76,6 +77,15 @@ namespace Utilities
     }
 
     template<typename _Ty>
+    void assertContent(const std::deque<_Ty>& contentExpected,
+                       const DVector::DVector<_Ty>& vector)
+    {
+        BOOST_CHECK_EQUAL(contentExpected.size(), vector.Size());
+        for (size_t idx = 0; idx < contentExpected.size(); ++idx)
+            BOOST_CHECK_EQUAL(vector[idx],  contentExpected[idx]);
+    }
+
+    template<typename _Ty>
     void assertEquals(const DVector::DVector<_Ty>& first,
                       const DVector::DVector<_Ty>& second)
     {
@@ -116,6 +126,217 @@ BOOST_AUTO_TEST_SUITE(CreateBasicTests)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+/**    **/
+BOOST_AUTO_TEST_SUITE(PopBackMethodTests)
+
+    BOOST_AUTO_TEST_CASE(PopBack)
+    {
+        std::deque<int> testValues {1, 2, 3, 4, 5};
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        dVector.pop_back();
+        testValues.pop_back();
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+        BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+        Utilities::assertContent(testValues, dVector);
+    }
+
+    BOOST_AUTO_TEST_CASE(PopBack_Reallocation)
+    {
+        std::deque<int> testValues {1,2,3,4,5,7,8,9,10,11,12,13,14,15};
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        dVector.pop_back();
+        testValues.pop_back();
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+        BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+        BOOST_CHECK_EQUAL(testValues.empty(), dVector.Empty());
+        Utilities::assertContent(testValues, dVector);
+    }
+
+    BOOST_AUTO_TEST_CASE(PopBack_UntilEmpty)
+    {
+        std::deque<int> testValues {1,2,3,4,5,7,8,9,10,11,12,13,14,15};
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        while (!dVector.Empty())
+        {
+            BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+            BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+            BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+            BOOST_CHECK_EQUAL(testValues.empty(), dVector.Empty());
+            Utilities::assertContent(testValues, dVector);
+
+            dVector.pop_back();
+            testValues.pop_back();
+        }
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+/**    **/
+BOOST_AUTO_TEST_SUITE(BackMethodTests)
+
+    BOOST_AUTO_TEST_CASE(CheckBack_AfterPushBack)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+    }
+
+    BOOST_AUTO_TEST_CASE(CheckBack_AfterPushFront)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_front(v);
+
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Back());
+    }
+
+    BOOST_AUTO_TEST_CASE(CheckBack_AfterPushBack_Reallocation)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+    }
+
+    BOOST_AUTO_TEST_CASE(CheckBack_AfterPushFront_Reallocation)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_front(v);
+
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Back());
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+/**    **/
+BOOST_AUTO_TEST_SUITE(BackMethodTests)
+
+    BOOST_AUTO_TEST_CASE(CheckFront_AfterPushBack)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+    }
+
+    BOOST_AUTO_TEST_CASE(CheckFront_AfterPushFront)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_front(v);
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Front());
+    }
+
+    BOOST_AUTO_TEST_CASE(CheckFront_AfterPushBack_Reallocation)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+    }
+
+    BOOST_AUTO_TEST_CASE(CheckFront_AfterPushFront_Reallocation)
+    {
+        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_front(v);
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Front());
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+/**    **/
+BOOST_AUTO_TEST_SUITE(PopFrontMethodTests)
+
+    BOOST_AUTO_TEST_CASE(PopFront)
+    {
+        std::deque<int> testValues {1, 2, 3, 4, 5};
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        dVector.pop_front();
+        testValues.pop_front();
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+        BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+        Utilities::assertContent(testValues, dVector);
+    }
+
+    BOOST_AUTO_TEST_CASE(PopFront_Reallocation)
+    {
+        std::deque<int> testValues {1,2,3,4,5,7,8,9,10,11,12,13,14,15};
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        dVector.pop_front();
+        testValues.pop_front();
+
+        BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+        BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+        BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+        BOOST_CHECK_EQUAL(testValues.empty(), dVector.Empty());
+        Utilities::assertContent(testValues, dVector);
+    }
+
+    BOOST_AUTO_TEST_CASE(PopFront_UntilEmpty)
+    {
+        std::deque<int> testValues {1,2,3,4,5,7,8,9,10,11,12,13,14,15};
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        while (!dVector.Empty())
+        {
+            BOOST_CHECK_EQUAL(testValues.back(), dVector.Back());
+            BOOST_CHECK_EQUAL(testValues.front(), dVector.Front());
+            BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+            BOOST_CHECK_EQUAL(testValues.empty(), dVector.Empty());
+            Utilities::assertContent(testValues, dVector);
+
+            dVector.pop_front();
+            testValues.pop_front();
+        }
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
 /** PushBack tests **/
 BOOST_AUTO_TEST_SUITE(PushBackTests)
 
@@ -143,6 +364,20 @@ BOOST_AUTO_TEST_SUITE(PushBackTests)
         BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
         BOOST_CHECK_EQUAL(testValues.empty(), dVector.Empty());
         BOOST_CHECK_EQUAL(40UL, dVector.Capacity());
+
+        Utilities::assertContent(testValues, dVector);
+    }
+
+    BOOST_AUTO_TEST_CASE(PushBack_RValue)
+    {
+        const std::vector<std::string> testValues { "I", "II", "III", "IV"};
+        DVector::DVector<std::string> dVector;
+        for (std::string v: testValues)
+            dVector.push_back(std::move(v));
+
+        BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+        BOOST_CHECK_EQUAL(testValues.empty(), dVector.Empty());
+        BOOST_CHECK_EQUAL(10UL, dVector.Capacity());
 
         Utilities::assertContent(testValues, dVector);
     }

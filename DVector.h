@@ -32,29 +32,29 @@ namespace DVector
 
 
     template<typename Type,
-            // typename Allocator = std::allocator<Type>>
             typename Allocator = Allocator<Type>>
     class DVector
     {
         using object_type = Type;
         using pointer = object_type*;
+        using size_type = size_t;
 
         static_assert(!std::is_same_v<object_type, void>,
                       "Type of the Objects in the pool can not be void");
 
-        static constexpr size_t initialCapacity { 10 };
-        static constexpr size_t growthFactor { 4 };
+        static constexpr size_type initialCapacity { 10 };
+        static constexpr size_type growthFactor { 4 };
 
     private:
         /** Elements collection block: **/
         pointer data { nullptr };
 
         /** Capacity: **/
-        size_t capacity { 0 };
+        size_type capacity { 0 };
 
         /** Index of the element **/
-        size_t left { 0 };
-        size_t right { 0 };
+        size_type left { 0 };
+        size_type right { 0 };
 
         /** The allocator to use for allocating and deallocating chunks: **/
         Allocator allocator;
@@ -63,8 +63,10 @@ namespace DVector
 
         void growVector()
         {
-            const size_t size = right - left - 1;
-            const size_t left_old = left, left_center_dist = capacity / 2 - left - 1;
+            // std::cout << "* * * * ReAlloc (" << capacity << " ==> " << capacity * growthFactor << ") * * * * \n";
+
+            const size_type size = right - left - 1;
+            const size_type left_old = left, left_center_dist = capacity / 2 - left - 1;
 
             capacity *= growthFactor;
             left = capacity / 2 - left_center_dist  - 1;
@@ -80,7 +82,7 @@ namespace DVector
 
         void destroy()
         {
-            const size_t size = right - left - 1;
+            const size_type size = right - left - 1;
 
             /** Invoke destructors for all contained objects: **/
             std::destroy_n(data + left + 1, size);
@@ -88,7 +90,7 @@ namespace DVector
 
     public:
 
-        explicit DVector(const size_t s = initialCapacity)
+        explicit DVector(const size_type s = initialCapacity)
         {
             capacity = s > 0 ? s : initialCapacity;
             data = allocator.allocate(capacity);
@@ -148,27 +150,37 @@ namespace DVector
     public:
 
         [[nodiscard]]
-        object_type& operator[] (size_t index) const {
+        object_type& Front() const noexcept {
+            return this->data[left + 1];
+        }
+
+        [[nodiscard]]
+        object_type& Back() const noexcept {
+            return this->data[right - 1];
+        }
+
+        [[nodiscard]]
+        object_type& operator[] (size_type index) const {
             return this->data[index + left + 1];
         }
 
         [[nodiscard]]
-        inline size_t Size() const noexcept {
+        inline size_type Size() const noexcept {
             return 0 != capacity ? right - left - 1 : 0;
         }
 
         [[nodiscard]]
-        inline size_t Capacity() const noexcept {
+        inline size_type Capacity() const noexcept {
             return capacity;
         }
 
         [[nodiscard]]
-        inline size_t FrontCapacity() const noexcept {
+        inline size_type FrontCapacity() const noexcept {
             return left + 1;
         }
 
         [[nodiscard]]
-        inline size_t BackCapacity() const noexcept {
+        inline size_type BackCapacity() const noexcept {
             return capacity - right;
         }
 
@@ -199,14 +211,6 @@ namespace DVector
             return data[right++];
         }
 
-        object_type& push_front(const object_type& v)
-        {
-            if (0 >= left)
-                growVector();
-            this->data[left] = v;
-            return data[left--];
-        }
-
         object_type& push_back(object_type&& v)
         {
             if (right >= capacity)
@@ -215,12 +219,30 @@ namespace DVector
             return data[right++];
         }
 
+        object_type& push_front(const object_type& v)
+        {
+            if (0 >= left)
+                growVector();
+            this->data[left] = v;
+            return data[left--];
+        }
+
         object_type& push_front(object_type&& v)
         {
             if (0 >= left)
                 growVector();
             this->data[left] = std::move(v);
             return data[left--];
+        }
+
+        void pop_back()
+        {
+            data[--right].~object_type();
+        }
+
+        void pop_front()
+        {
+            data[++left].~object_type();
         }
 
         template<typename ... Args>
@@ -266,11 +288,11 @@ namespace DVector
 
         void printInfo()
         {
-            const size_t size = right - left - 1;
+            const size_type size = right - left - 1;
             std::cout << "[ capacity = " << capacity << ", size = " << size << " ] "
                       << "[ left: " << left << ", right: " << right << " ]\n";
 
-            for (size_t idx = 0; idx < capacity; ++idx)
+            for (size_type idx = 0; idx < capacity; ++idx)
                 std::cout << '[' << idx << "] = " << data[idx] << std::endl;
         }
 
