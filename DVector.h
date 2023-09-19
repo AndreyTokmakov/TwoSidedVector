@@ -15,9 +15,25 @@ Description : DVector.h
 
 namespace DVector
 {
+    template<typename _Ty>
+    struct Allocator: std::allocator<_Ty>
+    {
+        _Ty* allocate(size_t size)
+        {
+            return new _Ty[size];
+        }
+
+        void deallocate(_Ty* ptr, size_t)
+        {
+            delete[] ptr;
+        }
+    };
+
+
 
     template<typename Type,
-            typename Allocator = std::allocator<Type>>
+            // typename Allocator = std::allocator<Type>>
+            typename Allocator = Allocator<Type>>
     class DVector
     {
         using object_type = Type;
