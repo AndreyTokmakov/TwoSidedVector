@@ -50,44 +50,35 @@ namespace Utilities
     }
 
     [[nodiscard]]
-    std::vector<int> getRandomIntegerVector(size_t size)
+    std::deque<int> getRandomIntegerDeque(size_t size)
     {
-        std::vector<int> intVector;
+        std::deque<int> numbers;
         while (size--)
-            intVector.push_back(getRandomIntInRange(0, static_cast<int>(size * 2)));
-        return intVector;
+            numbers.push_back(getRandomIntInRange(0, static_cast<int>(size * 2)));
+        return numbers;
     }
 
     [[nodiscard]]
-    std::vector<int> getRandomIntegerUniqueVector(size_t size)
+    std::deque<int> getRandomIntegerUniqueDeque(size_t size)
     {
-        std::vector<int> intVector;
+        std::deque<int> numbers;
         for (size_t i = 0; i < size; ++i)
-            intVector.push_back(getRandomUniqueInt(0, static_cast<int>(size * 2)));
-        return intVector;
+            numbers.push_back(getRandomUniqueInt(0, static_cast<int>(size * 2)));
+        return numbers;
     }
 
-    template<typename _Ty>
-    void assertContent(const std::vector<_Ty>& contentExpected,
-                       const DVector::DVector<_Ty>& vector)
+    template<typename Ty>
+    void assertContent(const std::deque<Ty>& contentExpected,
+                       const DVector::DVector<Ty>& vector)
     {
         BOOST_CHECK_EQUAL(contentExpected.size(), vector.Size());
         for (size_t idx = 0; idx < contentExpected.size(); ++idx)
             BOOST_CHECK_EQUAL(vector[idx],  contentExpected[idx]);
     }
 
-    template<typename _Ty>
-    void assertContent(const std::deque<_Ty>& contentExpected,
-                       const DVector::DVector<_Ty>& vector)
-    {
-        BOOST_CHECK_EQUAL(contentExpected.size(), vector.Size());
-        for (size_t idx = 0; idx < contentExpected.size(); ++idx)
-            BOOST_CHECK_EQUAL(vector[idx],  contentExpected[idx]);
-    }
-
-    template<typename _Ty>
-    void assertEquals(const DVector::DVector<_Ty>& first,
-                      const DVector::DVector<_Ty>& second)
+    template<typename Ty>
+    void assertEquals(const DVector::DVector<Ty>& first,
+                      const DVector::DVector<Ty>& second)
     {
         BOOST_CHECK_EQUAL(first.Size(), second.Size());
         BOOST_CHECK_EQUAL(first.Capacity(), second.Capacity());
@@ -126,6 +117,49 @@ BOOST_AUTO_TEST_SUITE(CreateBasicTests)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+/**    **/
+BOOST_AUTO_TEST_SUITE(CapacityTests)
+
+    BOOST_AUTO_TEST_CASE(TestInitialCapacity)
+    {
+        DVector::DVector<int> dVector;
+
+        BOOST_CHECK_EQUAL(10UL, dVector.Capacity());
+        BOOST_CHECK_EQUAL(5UL, dVector.FrontCapacity());
+        BOOST_CHECK_EQUAL(5UL, dVector.BackCapacity());
+    }
+
+    BOOST_AUTO_TEST_CASE(TestCapacityWithConstructor)
+    {
+        DVector::DVector<int> dVector(30);
+        BOOST_CHECK_EQUAL(30UL, dVector.Capacity());
+        BOOST_CHECK_EQUAL(15UL, dVector.FrontCapacity());
+        BOOST_CHECK_EQUAL(15UL, dVector.BackCapacity());
+    }
+
+    BOOST_AUTO_TEST_CASE(CapacityAfterReallocation_PushBack)
+    {
+        DVector::DVector<int> dVector;
+        for (size_t i = 0; i < 15; ++i)
+            dVector.push_back(i);
+
+        BOOST_CHECK_EQUAL(40UL, dVector.Capacity());
+        BOOST_CHECK_EQUAL(20UL, dVector.FrontCapacity());
+        BOOST_CHECK_EQUAL(5UL, dVector.BackCapacity());
+    }
+
+    BOOST_AUTO_TEST_CASE(CapacityAfterReallocation_PushFront)
+    {
+        DVector::DVector<int> dVector;
+        for (size_t i = 0; i < 15; ++i)
+            dVector.push_front(i);
+
+        BOOST_CHECK_EQUAL(40UL, dVector.Capacity());
+        BOOST_CHECK_EQUAL(5UL, dVector.FrontCapacity());
+        BOOST_CHECK_EQUAL(20UL, dVector.BackCapacity());
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 /**    **/
 BOOST_AUTO_TEST_SUITE(PopBackMethodTests)
@@ -191,7 +225,7 @@ BOOST_AUTO_TEST_SUITE(BackMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckBack_AfterPushBack)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(4);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_back(v);
@@ -201,7 +235,7 @@ BOOST_AUTO_TEST_SUITE(BackMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckBack_AfterPushFront)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(4);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_front(v);
@@ -211,7 +245,7 @@ BOOST_AUTO_TEST_SUITE(BackMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckBack_AfterPushBack_Reallocation)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(45);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_back(v);
@@ -221,7 +255,7 @@ BOOST_AUTO_TEST_SUITE(BackMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckBack_AfterPushFront_Reallocation)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(45);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_front(v);
@@ -233,11 +267,11 @@ BOOST_AUTO_TEST_SUITE_END()
 
 
 /**    **/
-BOOST_AUTO_TEST_SUITE(BackMethodTests)
+BOOST_AUTO_TEST_SUITE(FrontMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckFront_AfterPushBack)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(4);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_back(v);
@@ -247,7 +281,7 @@ BOOST_AUTO_TEST_SUITE(BackMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckFront_AfterPushFront)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(4);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_front(v);
@@ -257,7 +291,7 @@ BOOST_AUTO_TEST_SUITE(BackMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckFront_AfterPushBack_Reallocation)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(45);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_back(v);
@@ -267,7 +301,7 @@ BOOST_AUTO_TEST_SUITE(BackMethodTests)
 
     BOOST_AUTO_TEST_CASE(CheckFront_AfterPushFront_Reallocation)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(45);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(45);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_front(v);
@@ -342,7 +376,7 @@ BOOST_AUTO_TEST_SUITE(PushBackTests)
 
     BOOST_AUTO_TEST_CASE(PushBack)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(4);
         DVector::DVector<int> dVector;
         for (const auto &v: testValues)
             dVector.push_back(v);
@@ -356,7 +390,7 @@ BOOST_AUTO_TEST_SUITE(PushBackTests)
 
     BOOST_AUTO_TEST_CASE(PushBack_Realloc)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(15);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(15);
         DVector::DVector<int> dVector;
         for (const auto &v: testValues)
             dVector.push_back(v);
@@ -370,7 +404,7 @@ BOOST_AUTO_TEST_SUITE(PushBackTests)
 
     BOOST_AUTO_TEST_CASE(PushBack_RValue)
     {
-        const std::vector<std::string> testValues { "I", "II", "III", "IV"};
+        const std::deque<std::string> testValues { "I", "II", "III", "IV"};
         DVector::DVector<std::string> dVector;
         for (std::string v: testValues)
             dVector.push_back(std::move(v));
@@ -384,7 +418,7 @@ BOOST_AUTO_TEST_SUITE(PushBackTests)
 
     BOOST_AUTO_TEST_CASE(PushBack_CustomTypes_TODO)
     {
-        const std::vector<std::string> testValues { "I", "II", "III", "IV"};
+        const std::deque<std::string> testValues { "I", "II", "III", "IV"};
         DVector::DVector<std::string> dVector;
         for (const auto &v: testValues)
             dVector.push_back(v);
@@ -404,7 +438,7 @@ BOOST_AUTO_TEST_SUITE(PushFrontTests)
 
     BOOST_AUTO_TEST_CASE(PushFront)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(4);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(4);
         DVector::DVector<int> dVector;
         for (int val : std::ranges::reverse_view(testValues)) {
             dVector.push_front(val);
@@ -419,7 +453,7 @@ BOOST_AUTO_TEST_SUITE(PushFrontTests)
 
     BOOST_AUTO_TEST_CASE(PushFront_Realloc)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(15);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(15);
         DVector::DVector<int> dVector;
         for (int val : std::ranges::reverse_view(testValues)) {
             dVector.push_front(val);
@@ -434,7 +468,7 @@ BOOST_AUTO_TEST_SUITE(PushFrontTests)
 
     BOOST_AUTO_TEST_CASE(PushFront_CustomTypes_TODO)
     {
-        const std::vector<std::string> testValues { "I", "II", "III", "IV"};
+        const std::deque<std::string> testValues { "I", "II", "III", "IV"};
         DVector::DVector<std::string> dVector;
         for (const std::string& val : std::ranges::reverse_view(testValues)) {
             dVector.push_front(val);
@@ -476,7 +510,7 @@ BOOST_AUTO_TEST_SUITE(CopyConstructor)
 
     BOOST_AUTO_TEST_CASE(CopyConstructorTests)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(7);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(7);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -487,7 +521,7 @@ BOOST_AUTO_TEST_SUITE(CopyConstructor)
 
     BOOST_AUTO_TEST_CASE(CopyConstructorTests_Realloc)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(50);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(50);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -504,7 +538,7 @@ BOOST_AUTO_TEST_SUITE(CopyAssignmentOperator)
 
     BOOST_AUTO_TEST_CASE(CopyAssignmentTests)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(7);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(7);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -517,7 +551,7 @@ BOOST_AUTO_TEST_SUITE(CopyAssignmentOperator)
 
     BOOST_AUTO_TEST_CASE(CopyAssignmentTests_Reallocation)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(50);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(50);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -535,7 +569,7 @@ BOOST_AUTO_TEST_SUITE(MoveConstructorTests)
 
     BOOST_AUTO_TEST_CASE(MoveConstruction_Basic)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(7);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(7);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -555,7 +589,7 @@ BOOST_AUTO_TEST_SUITE(MoveConstructorTests)
 
     BOOST_AUTO_TEST_CASE(MoveConstruction_Reallocation)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(57);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(57);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -580,7 +614,7 @@ BOOST_AUTO_TEST_SUITE(MoveAssignmentOperatorTests)
 
     BOOST_AUTO_TEST_CASE(MoveAssignment)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(7);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(7);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -601,7 +635,7 @@ BOOST_AUTO_TEST_SUITE(MoveAssignmentOperatorTests)
 
     BOOST_AUTO_TEST_CASE(MoveAssignment_Reallocation)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(57);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(57);
         DVector::DVector<int> dVectorOrig;
         for (int v: testValues)
             dVectorOrig.push_back(v);
@@ -703,12 +737,51 @@ BOOST_AUTO_TEST_SUITE(SizeTests)
     }
 BOOST_AUTO_TEST_SUITE_END()
 
+/**    **/
+BOOST_AUTO_TEST_SUITE(AtMethodMethodTests)
+
+    BOOST_AUTO_TEST_CASE(GetElement)
+    {
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(7);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+        for (size_t idx = 0; idx < testValues.size(); ++idx)
+            BOOST_CHECK_EQUAL(dVector[idx], testValues[idx]);
+    }
+
+    BOOST_AUTO_TEST_CASE(GetElement_Reallocation)
+    {
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(57);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        BOOST_CHECK_EQUAL(testValues.size(), dVector.Size());
+        for (size_t idx = 0; idx < testValues.size(); ++idx)
+            BOOST_CHECK_EQUAL(dVector[idx], testValues[idx]);
+    }
+
+    BOOST_AUTO_TEST_CASE(OutOufRangeError)
+    {
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(7);
+        DVector::DVector<int> dVector;
+        for (int v: testValues)
+            dVector.push_back(v);
+
+        BOOST_REQUIRE_THROW([&]{ [[maybe_unused]] auto x = dVector.at(10);}(), std::out_of_range);
+    }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 /**  IndexOperatorTests  **/
 BOOST_AUTO_TEST_SUITE(IndexOperatorTests)
 
     BOOST_AUTO_TEST_CASE(BasicTest)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(7);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(7);
         DVector::DVector<int> dVector;
         for (int v: testValues)
             dVector.push_back(v);
@@ -720,7 +793,7 @@ BOOST_AUTO_TEST_SUITE(IndexOperatorTests)
 
     BOOST_AUTO_TEST_CASE(CheckValues_With_PushBack_and_PushFront)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(8);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(8);
 
         constexpr int N = 3;
         DVector::DVector<int> dVector;
@@ -736,7 +809,7 @@ BOOST_AUTO_TEST_SUITE(IndexOperatorTests)
 
     BOOST_AUTO_TEST_CASE(CheckValues_With_PushBack_and_PushFront_Realloc)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(100);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(100);
 
         constexpr int N = 40;
         DVector::DVector<int> dVector;
@@ -752,7 +825,7 @@ BOOST_AUTO_TEST_SUITE(IndexOperatorTests)
 
     BOOST_AUTO_TEST_CASE(CheckValues_AfterMove)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(100);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(100);
 
         constexpr int N = 40;
         DVector::DVector<int> dVectorOrig;
@@ -774,7 +847,7 @@ BOOST_AUTO_TEST_SUITE(IndexOperatorTests)
 
     BOOST_AUTO_TEST_CASE(CheckValues_WithCopyConstructor)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerVector(100);
+        const std::deque<int> testValues = Utilities::getRandomIntegerDeque(100);
 
         constexpr int N = 40;
         DVector::DVector<int> dVectorOrig;
@@ -847,7 +920,7 @@ BOOST_AUTO_TEST_SUITE(DataMethodTests)
     {
         DVector::DVector<int> dVector;
 
-        const std::vector<int> testValues = Utilities::getRandomIntegerUniqueVector(5);
+        const std::deque<int> testValues = Utilities::getRandomIntegerUniqueDeque(5);
         for (int v: testValues)
             dVector.push_back(v);
 
@@ -858,7 +931,7 @@ BOOST_AUTO_TEST_SUITE(DataMethodTests)
 
     BOOST_AUTO_TEST_CASE(GetData_CheckValues2)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerUniqueVector(20);
+        const std::deque<int> testValues = Utilities::getRandomIntegerUniqueDeque(20);
 
         constexpr int N = 5;
         DVector::DVector<int> dVector;
@@ -874,7 +947,7 @@ BOOST_AUTO_TEST_SUITE(DataMethodTests)
 
     BOOST_AUTO_TEST_CASE(GetData_CheckValues_Realloc)
     {
-        const std::vector<int> testValues = Utilities::getRandomIntegerUniqueVector(100);
+        const std::deque<int> testValues = Utilities::getRandomIntegerUniqueDeque(100);
 
         constexpr int N = 40;
         DVector::DVector<int> dVector;

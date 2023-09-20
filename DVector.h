@@ -12,6 +12,7 @@ Description : DVector.h
 
 #include <memory>
 #include <algorithm>
+#include <format>
 
 namespace DVector
 {
@@ -161,6 +162,13 @@ namespace DVector
 
         [[nodiscard]]
         object_type& operator[] (size_type index) const {
+            return this->data[index + left + 1];
+        }
+
+        [[nodiscard]]
+        object_type& at(size_type index) const {
+            if (index >= (right - left - 1))
+                throw std::out_of_range(std::format("{} index is out of range", index));
             return this->data[index + left + 1];
         }
 
